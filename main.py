@@ -2,21 +2,21 @@ import docx, fitz, os
 from PIL import Image
 from docx2pdf import convert
 
-# create new document
-doc = docx.Document()
+# # create new document
+# doc = docx.Document()
 
-# write each character on the document
-print("writing the document...")
-p = doc.add_paragraph()
-run = p.add_run("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ")
-run.font.name = "Alkhemikal"
-run.font.size = docx.shared.Pt(720)
+# # write each character on the document
+# print("writing the document...")
+# p = doc.add_paragraph()
+# run = p.add_run("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ")
+# run.font.name = "Candara"
+# run.font.size = docx.shared.Pt(520)
 
-# save the document
-doc.save("out.docx")
-# and convert it to pdf
-print("converting it to pdf...")
-convert("out.docx")
+# # save the document
+# doc.save("out.docx")
+# # and convert it to pdf
+# print("converting it to pdf...")
+# convert("out.docx", "out.pdf")
 
 # open that pdf file
 doc = fitz.open("out.pdf")
@@ -107,6 +107,8 @@ space.save(f"final imgs/{lastI+1}.png")
 spriteSize[0] += space.width + 1 # +1 for the letter separator
 
 # build the sprite
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 "
+sinkingLowerCases = "gjpqy"
 sprite = Image.new("RGBA", spriteSize, (0,0,0,0))
 separator = Image.new("RGBA", (1, sprite.height), (118, 118, 118, 255))
 
@@ -114,16 +116,21 @@ left = 0
 top = 0
 bot = 0
 right = 0
+lowerCaseTop = 0
 
 for i in range(len(doc) + 1): # +1 to compensate for the space
     img = Image.open(f"final imgs/{i}.png")
 
     right = left + img.width
-    if i < 25:
+    if i < 25: # i < 25 means the upper cases
         top = 0
         bot = top + img.height
     else:
         bot = leastHeight
+        top = bot - img.height
+    
+    if alphabet[i] in sinkingLowerCases:
+        bot = sprite.height
         top = bot - img.height
 
     # place the letter image on the sprite
@@ -137,26 +144,20 @@ for i in range(len(doc) + 1): # +1 to compensate for the space
 
 # place the separators
 left = 0
-top = 0
-bot = 0
 right = 0
 
 for i in range(len(doc) + 1): #+1 to compensate for the space
     img = Image.open(f"final imgs/{i}.png")
 
     right = left + img.width
-    if i < 25:
-        top = 0
-        bot = top + img.height
-    else:
-        bot = leastHeight
-        top = bot - img.height
 
     # place the separator on the sprite
     sprite.paste(separator, (right, 0, right+1, sprite.height))
     # update the left
     left += img.width + 1
 
+
 # save the sprite
 sprite.save("sprite.png")
 print("done")
+os.system("pause > nul")
